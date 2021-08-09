@@ -1,3 +1,5 @@
+# 초보 프로그래머를 위한 컴퓨터의 작동원리
+
 ## 컴퓨터의 구성 요소
 * User, Input device, Computer, Ouput device
 ### Hardware
