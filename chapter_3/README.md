@@ -46,7 +46,7 @@
 |%x or %X	|Hexadecimal representation|
 |%n|	Prints nothing|
 |%%|	Prints % character|
-
+   
 [출처](https://www.tutorialspoint.com/format-specifiers-in-c)
 
 ## Integers and Real-numbers
@@ -55,7 +55,8 @@
   * Sign : 부호를 의미
   * Exponent : 지수 부분
   * Fraction : 분수 부분
-![image](https://user-images.githubusercontent.com/74703501/128965514-64ff30e8-845f-4ed0-afd9-a1e3d2ff3010.png)   
+
+![image](https://user-images.githubusercontent.com/74703501/128965514-64ff30e8-845f-4ed0-afd9-a1e3d2ff3010.png)      
 [출처](https://bravenamme.github.io/2020/08/10/cpu-bit/)
 
 ## 정수의 overflow와 underflow
@@ -98,11 +99,11 @@ int main()
 ## Charater
 * 문자도 2진수로 표기
 * ASCII(American Standard Code for Information Interchange)
-![image](https://user-images.githubusercontent.com/74703501/128966825-87a424f6-4bcd-4edf-9dd3-4b965c1d92c1.png)
+![image](https://user-images.githubusercontent.com/74703501/128966825-87a424f6-4bcd-4edf-9dd3-4b965c1d92c1.png)   
 [출처](https://www.asciitable.com/)
 
 ## Floating-point types
-* Scientific Notations 
+* Scientific Notations    
 ![image](https://user-images.githubusercontent.com/74703501/128967287-02f5da84-ef77-4f05-b9b9-c77666ee4081.png)
 [출처](https://scientificnotation.org/)
 
