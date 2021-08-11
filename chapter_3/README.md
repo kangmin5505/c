@@ -3,7 +3,7 @@
 ## 데이터와 자료형
 * 메모리(자원)를 효율적으로 사용하기 위해 나뉘어져 있음
 * 문자도 정수에 포함   
-![image](https://user-images.githubusercontent.com/74703501/128963827-ae06044c-0fd9-4f99-a853-d75f0adac55b.png)
+![image](https://user-images.githubusercontent.com/74703501/128963827-ae06044c-0fd9-4f99-a853-d75f0adac55b.png)   
 [출처](https://swpfun.tistory.com/572)
 
 ## Variable and Constant
