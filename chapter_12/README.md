@@ -62,7 +62,7 @@
 [출처](https://www.inflearn.com/course/following-c)
 * translation unit == file
 * 크게 static과 not static으로 나눔
-* BSS(Block Started by Symbol
+* BSS(Block Started by Symbol)
 * 자동 변수(Automatic variables)
   * Automatic storage duration, block scope, no linkage
   * Any variable declared in a block or function header
@@ -97,23 +97,162 @@ int i = 1;
   * 파일 내부에서만 사용 가능
   
 ## 함수의 저장 공간 분류
-  * Functions external (by default) or static
-  * A function declaration(prototyping) is assumed to be extern
-  * 함수 이름 앞에 static을 붙이면 다른 파일에서 사용 불가
-    * 다른 파일에서 사용할 필요 없는 함수를 linkage 되지 않게 할 수 있음
+* Functions external (by default) or static
+* A function declaration(prototyping) is assumed to be extern
+* 함수 이름 앞에 static을 붙이면 다른 파일에서 사용 불가
+  * 다른 파일에서 사용할 필요 없는 함수를 linkage 되지 않게 할 수 있음
 
 ## 난수 생성기 모듈 만들기 예제
+* #pragma once : 컴파일러가 한 번만 컴파일 하도록 명령하는 것
 
 ## 메모리 동적 할당(Dynamic Storage Allocation)
-
+* 필요한 메모리의 크기를 미리 알 수 없을 경우 사용
+  * stack은 크기가 제한되어 있음
+  * heap은 가상주소공간을 사용해서 컴퓨터의 메모리를 충분히 사용할 수 있도록 제공
+* malloc(할당) / free(반납)
+  * malloc() returns a void type pointer(void* : generic pointer)
+  * free() deallocates the memory
+   * no action occurs when ptr is NULL
+     * free() 이후 포인터에 NULL 대입(권장)
+   * 메모리를 할당 받아왔을 때 따로 초기화 필요
+  * 할당 받을 메모리가 없을 경우에는 NULL 반환
+```C
+ int n = 0; 
+ // n from files, internet, scanf, etc
+ char* arr = (char*)malloc(sizeof(char) * n);
+ 
+ // 메모리 할당이 안 된 경우 NULL 반환
+ if (arr == NULL)
+ {
+  puts("Memory allocation failed.");
+  
+  /*
+   exit(EXIT_FAILURE) is similar to return 1 IN main().
+   exit(EXIT_SUCCESS) is similar to return 0 IN main().
+  */
+  exit(EXIT_FAILURE);
+ }
+ // ...
+ 
+ free(arr);
+ // free() 이후 포인터에 NULL 대입(권장) => 포인터의 주소는 변하지 않기 때문에
+ arr = NULL;
+ 
+ /*
+   Comparision to VLA
+   
+   VLA
+   - not supported by VS compilers.
+   - automatic duration, cannot be resized
+   - limited by stack size (when compiler places VLA in stack segment)
+ */
+ 
+ return 0;
+```
+  
 ## 메모리 누수(Leak)와 free()의 중요성
+* 메모리 누수를 꼭 체크해야함
+ * 메모리 누수가 일어날 경우, 컴퓨터가 가지고 있는 메모리 한계에 도달했을 때 문제 발생
 
 ## 동적 할당 메모리를 배열처럼 사용하기
+* stack : 크기가 제한 / 메모리 자동 반환
+* heap : 가상주소공간을 사용하여 크기가 엄청 큼 / 메모리 수동 반환
+* 1차원 배열을 2, 3차원 배열로 사용
+```C
+#include <stdio.h>
+#include <stdlib.h> // malloc()
+
+int main()
+{
+// Using 1D arrays as 2D arrays
+ int row = 3, col = 2;
+ int* ptr = (int*)malloc(sizeof(int) * row * col);
+ if (ptr == NULL) exit(1);
+ 
+ for (int r = 0; r < row; r++)
+  for (int c = 0; c < col; c++)
+   ptr[c + col * r] = c + col * r;
+ 
+ for (int r = 0; r < row; r++)
+ {
+  for (int c = 0; c < col; c++)
+   printf("%d ", ptr[c + col * r]);
+  printf("\n");
+ }
+ 
+// Using 1D arrays as 3D arrays
+  int row = 3, col = 2, depth = 2;
+  int* ptr = (int*)malloc(sizeof(int) * row * col * depth);
+  if (ptr == NULL) exit(1);
+
+  for (int d = 0; d < depth; d++)
+      for (int r = 0; r < row; r++)
+          for (int c = 0; c < col; c++)
+              ptr[c + col * r + (col * row) * d] = c + col * r + (col * row) * d;
+
+  for (int d = 0; d < depth; d++)
+  {
+      for (int r = 0; r < row; r++)
+          {
+              for (int c = 0; c < col; c++)
+                  printf("%d ", ptr[c + col * r + (col * row) * d]);
+              printf("\n");
+          }
+      printf("-------------\n");
+  }
+
+}
+
+```
 
 ## calloc(), realloc()
+* calloc()
+  * contiguous allocation
+  * 0으로 초기화를 해줌
+* realloc()
+  * doesn't initialize the bytes added
+  * returns NULL if can't enlarge the memory block
+  * If first argument is NULL, it behaves like malloc()
+  * If second argument is 0, it frees the memory block
+  * 기존 메모리는 복사하고, 추가된 메모리에 대해서 초기화를 해주지 않음
+```C
+ int n = 10;
+ int* ptr = NULL;
+ 
+ //ptr = (int*)malloc(sizeof(int) * n); // 초기화를 안 해줌
+ ptr = (int*)calloc(n, sizeof(int)); // contiguous allocation
+ 
+ n = 20;
+ int* ptr2 = NULL;
+ ptr2 = (int*)realloc(ptr, n * sizeof(int));
+ // ptr = (int*)realloc(ptr, n * sizeof(int));
+```
 
 ## 동적 할당 메모리와 저장 공간 분류
+![image](https://user-images.githubusercontent.com/74703501/130170489-8a53503b-b779-4b0f-9c43-38e8a26a427d.png)   
+[출처](https://www.inflearn.com/course/following-c)   
 
 ## 자료형 한정자들(Type qualifiers) const, volatile, restrict
+* const를 쓰려면 초기화 필수
+  * const 선언 이후에 값 변경이 안 되는데, 처음에 초기화를 안 해주면 값을 생성할 수가 없음
+  * ideompotent : 중복 const 가능(ex. const const const int n = 6;)
+```C
+ // 값 변경 불가
+ const float* ptr = &fl;
+ // 주소 변경 불가
+ float* const ptr = &fl;
+ // ideompotent
+ typedef const int zip;
+ const zip q = 8; // const const int zip
+```
+* volatile
+  * Do not optimize (ex. hardward clock)
+* restrict(\__restrict in VS)
+  * Sole initial means of accessing a data object
+    * 최적화를 도와줌
+  * Compiler can't check this restriction
 
 ## 멀티 쓰레딩(Multi-Threading)
+* 멀티 코어를 사용하여 병행처리
+* Racing condition : 전역 변수 경쟁
+ * \_Atomic : racing condition을 막아줌 / 대신 느림
