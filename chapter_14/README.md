@@ -166,37 +166,301 @@ int main()
   * scanf("%[^\n]%*c", &string)
   
 ## 구조체와 할당 메모리
+```C
+#define SLEN 81
 
-## 복합 리터럴
+struct namect {
+  char* fname;
+  char* lname;
+  int letters;
+};
 
-## 신축성있는 배열 멤버
+int main()
+{
+  /*
+    Dangerous usage
+  */
+  
+  struct namect p = { "Kang-Min", "Kim" };
+  // p.lname은 수정 불가(p.lname 프로그램코드 메모리에 올라가 있어서)
+  int f1 = scanf("%[^\n]%*c", p.lname);
+  
+  /*
+    Recommended usage
+  */
+  
+  char buffer[SLEN] = { 0, };
+  int f2 = scanf("%[^\n]%*c", buffer);
+  p.fname = (char*)malloc(strlen(buffer) + 1);
+  
+}
+```
+## 복합 리터럴(Compound literals)
+```C
+  struct person user = { "kamgin", 27, 184.0 };
+  
+  // 바꾸고 싶은 변수로 초기화를 실시
+  // 대입
+  struct person user2 = { "kimkim", 37, 174.0 };
+  user = user2;
+  
+  // 복합 리터럴(주소를 가지고 있음)
+  user = (struct person){ "kimkim", 37, 174.0 };
+```
 
-## 익명 구조체
+## 신축성있는 배열 멤버(Flexible Array Members)
+```C
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+  /*
+    Flexible array member
+  */
+  
+  // flexible array member는 메모리를 차지하지 않기 때문에 sizeof(flex) = 16 bytes 이다( 4 + 4(memory padding) + 8)
+  struct flex
+  {
+    size_t count;
+    double average;
+    double values[]; // flexible array member (last member!)
+  }
+  
+  const size_t n = 3;
+  
+  // 배열로 사용하기 싶은 메모리만큼 추가로 동적할당 받음
+  struct flex* pf = (struct flex*)malloc(sizeof(struct flex) + n * sizeof(doube));
+}
+```
+* must be last member
+* 메모리를 차지하지 않음
+* 포인터 멤버 vs 배열 멤버
+  * 포인터 멤버
+    * 포인터 자체가 메모리를 차지함(x64 : 8 bytes, x86 : 4 bytes)
+    * 포인터 동적할당을 받았기 때문에 포인터 멤버는 힙의 알 수 없는 곳의 메모리를 받아서 순차적이지 않음
+  * 배열 멤버
+    * 메모리가 순차적
+    * Don't copy flexible members, use memcpy() instead
+
+## 익명 구조체(anonymous structures)
+```C
+struct names
+{
+  char first[20];
+  char last[20];
+};
+
+struct person
+{
+  int id;
+  struct names name;
+};
+
+struct person2
+{
+  int id;
+  struct { char first[20]; char last[20]; };  // anonymous structures
+};
+
+int main()
+{
+  // non-anonymous structures
+  struct person ted = {123, {"Bill", "Gates"} };
+  puts(ted.name.first);
+  
+  // anonymous structures
+  struct person2 ted2 = {123, {"Bill", "Gates"} };
+  // struct person2 ted2 = {123, "Bill", "Gates" }; // also work
+  puts(ted.first);
+}
+
+```
+* member access가 좀 더 수월 
 
 ## 구조체의 배열을 사용하는 함수
+```C
+#define SLEN 101
+
+struct book
+{
+  char name[SLEN];
+  char author[SLEN];
+};
+
+int main()
+{
+  // 구조체의 배열 선언
+  struct book my_books[3];
+}
+```
 
 ## 구조체 파일 입출력 연습문제
+* text형식 보다 binary형식으로 전송하는 게 더 빠름
 
-## 공용체의 원리
+
+## 공용체의 원리(Union)
+* Union
+  * store different data types in the same memory space
+  * union의 메모리는 union 안의 가장 큰 자료형 사이즈가 배정
+  * 같은 메모리 공간을 사용
+    * 모든 member의 시작 주소가 동일
+* 선언
+```C
+union my_union {
+  int i;
+  double d;
+  char c;
+};
+
+int main() 
+{
+  union my_union uni1;
+  
+  /*
+    Initializing unions
+  */
+  
+  union my_union uni2 = uni1; // Copy another union
+  union my_union uni3 = { 10 }; // First element(member) only
+  union my_union uni4 = { .c = 'A' }; // Designated initializer
+  union my_union uni5 = { .d = 1.23, .i = 100 }; // Do NOT recommend
+}
+```
 
 ## 공용체와 구조체를 함께 사용하기
+* 문법이 복잡하진 않지만 구조가 복잡해짐
+```C
+struct personal_owner {
+  char rrn1[7]; // Resident Registration Number
+  char rrn2[8]; // ex: 830422-1185600
+};
 
-## 익명 공용체
+struct company_owner {
+  char crn1[4]; // Company Registration Number
+  char crn2[3]; // ex: 111-22-33333
+  char crn3[6];
+};
 
-## 열거형
+union data {
+  struct personal_owner po;
+  struct company_owner co;
+};
 
-## 열거형 연습문제
+struct car_data {
+  char model[15];
+  int status; /* 0 = personal, 1 = company */
+  union data ownerinfo;
+}
+```
+## 익명 공용체(Anonymous unions)
+* 코드가 간결해짐
+```C
+struct personal_owner {
+  char rrn1[7]; // Resident Registration Number
+  char rrn2[8]; // ex: 830422-1185600
+};
 
-## 이름공간 공유하기
+struct company_owner {
+  char crn1[4]; // Company Registration Number
+  char crn2[3]; // ex: 111-22-33333
+  char crn3[6];
+};
 
-## 함수 포인터의 원리
+struct car_data {
+  char model[15];
+  int status; /* 0 = personal, 1 = company */
+  union {
+  struct personal_owner po;
+  struct company_owner co;
+  }
+};
+```
+
+## 열거형(enumerated types)
+* enumerated type
+  * symbolic names to represent integer constants
+  * improve readability and make it easy to maintain
+  * enum-specifier
+* enumerators
+  * the symbolic constatns
+  * enumerators are not strings
+```C
+              // 0,     1,      2,     3,    4,     5
+enum spectrum { red, orange, yellow, green, blue, violet };
+enum levels { low = 100, medium = 500, high = 2000 };
+```
+
+## 이름공간(Namespace) 공유하기
+* Namespace
+  * Identify parts of a program in which a name is recognized
+  * You can use the same name for one variable and one tag
+  * C++ : use namespace to use the same identifiers in the duplicated scopes
+* Namespace pollution
+  * names in different files accidentally conflicting with each other
+  * 예방하기 위해 최대한 작은 scope 안에 변수를 선언
+
+## 함수 포인터(Function pointers)의 원리
+* 반환값의 type과 파라미터의 type을 같이 선언
+* 함수 이름 자체가 주소
+* 함수 포인터를 통해 함수 실행 가능
+```C
+void f1()
+{
+  return;
+}
+
+int f2(char i)
+{
+  return i + 1;
+}
+
+int main()
+{
+  // 함수 이름 자체가 주소
+  void (*pf1)() = f1;
+  // void (*pf1)() = &f1;
+  
+  int (*pf2)(char) = f2;
+  
+  // 함수 포인터를 통해 함수 실행 가능
+  (*ptf1)(); // call f1 via pf1
+  //pf1();
+}
+```
+* 프로그래머는 함수의 이름을 이용해서 프로그램을 작성하지만, 컴파일러는 이름(식별자)들을 메모리에서의 주소로 번역함. 즉, 함수를 실행시킨다는 것은 메모리에서 함수의 주소 위치에 저장되어 있는 명령어들을 순차적으로 수행한다는 의미
 
 ## 함수 포인터의 사용 방법
+* \__cdecl is function calling convention
 
 ## 자료형에게 별명을 붙여주는 typedef
+* typedef specifier
+  * give symbolic names (or aliases) to type
+  * Does not create new types
+* portable data types
+  * ex) size_t, time_t
+    * sizeof() return type x86 : unsigned int / x64 : unsigned long long
+      * 환경에 따라 자료형을 바꿔줌
+* typedef(권장) vs #define
+  * typedef interpretation is performed by the compiler, not the preprocessor
+  * more flexible than #define
+  * typedef has scopes
+* one good way to synthesize declarations is in small steps with typedef
 
 ## 복잡한 선언을 해석하는 요령
+* Deciphering complex declarations
+  * always read declarations from the inside out
+  * when there's a choice, always favor [] and () over \*(asterisk)
+* A function can't return an array, but it can return a pointer to an array
+* A function can't return a function, but if can return a pointer to a function
+* An array of functions aren't possible, but an  array of function pointers are possible
 
 ## qsort 함수 포인터 연습문제
-
-## 함수 포인터의 배열 연습문제
+```C
+void qsort(
+   void *base,
+   size_t number,
+   size_t width,
+   int (__cdecl *compare )(const void *, const void *)
+);
+```
