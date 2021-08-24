@@ -39,7 +39,7 @@
   |%>|}|
   |%:|#|
 * Two physical lines vs One logical line
-  * '\' 사용
+  * '\\' 사용
 ```C
   printf("This is a very very very very \
     very very very long long long long line.\n");
@@ -53,8 +53,8 @@
 * Macro
   * An instruction that represents a sequence of instructions in abbreviated form.
   ```C
+  preprocessor directive    Macro(name)    body(or replacement list) 
           #define            SAY_HELLO      printf("Hello, World!");
-  preprocessor directive    Macro(name)    body(or replacement list)
   ```
 * Object-like macros vs Function-like macros
 ```C
@@ -90,7 +90,7 @@ printf("MESSAGE\n"); //  Not replaced
   // # 사용
   #define PRINT_SQR2(x) printf("The square of " #x " is %d.\n", SQUARE(x))
   ```
-* ## operator combines two tokens into a single token
+* \#\# operator combines two tokens into a single token
 ```C
 #define XNAME(x) x ## n
 
